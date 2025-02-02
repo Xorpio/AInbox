@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ainbox.Web", "ainbox\ainbox.Web\ainbox.Web.csproj", "{A98040B4-D1BE-45B4-9942-66655CDC8446}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ainbox", "ainbox\ainbox\ainbox.csproj", "{28866DCA-6FB2-4338-8E95-7D0C5FD3B948}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ainbox.Shared", "ainbox\ainbox.Shared\ainbox.Shared.csproj", "{858731AE-D952-4E36-9FAC-6787C2A95C20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A98040B4-D1BE-45B4-9942-66655CDC8446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A98040B4-D1BE-45B4-9942-66655CDC8446}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A98040B4-D1BE-45B4-9942-66655CDC8446}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A98040B4-D1BE-45B4-9942-66655CDC8446}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28866DCA-6FB2-4338-8E95-7D0C5FD3B948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28866DCA-6FB2-4338-8E95-7D0C5FD3B948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28866DCA-6FB2-4338-8E95-7D0C5FD3B948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28866DCA-6FB2-4338-8E95-7D0C5FD3B948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{858731AE-D952-4E36-9FAC-6787C2A95C20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{858731AE-D952-4E36-9FAC-6787C2A95C20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{858731AE-D952-4E36-9FAC-6787C2A95C20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{858731AE-D952-4E36-9FAC-6787C2A95C20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
