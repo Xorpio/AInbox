@@ -124,17 +124,17 @@
         }
         catch (ImapProtocolException ex)
         {
-            Logger.LogError(ex, "IMAP protocol error: {Message}", ex.Message);
+            Logger.LogError(ex, "IMAP protocol error occurred");
             emailMessage = null;
         }
         catch (AuthenticationException ex)
         {
-            Logger.LogError(ex, "Authentication error: {Message}", ex.Message);
+            Logger.LogError(ex, "Authentication error occurred");
             emailMessage = null;
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Unexpected error: {Message}", ex.Message);
+            Logger.LogError(ex, "Unexpected error occurred");
             emailMessage = null;
         }
     }
