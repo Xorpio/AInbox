@@ -1,6 +1,7 @@
 ﻿using ainbox.Services;
 using ainbox.Shared.Services;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace ainbox
 {
@@ -21,6 +22,17 @@ namespace ainbox
             builder.Services.AddSingleton<ISettingsService, SettingsService>();
 
             builder.Services.AddMauiBlazorWebView();
+
+            // Configure logging for MAUI - log to file using Serilog
+            var logFilePath = Path.Combine(FileSystem.AppDataDirectory, "logs", "ainbox-.log");
+            Directory.CreateDirectory(Path.GetDirectoryName(logFilePath)!);
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(Log.Logger);
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

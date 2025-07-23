@@ -4,6 +4,11 @@ using ainbox.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging for web app - log to console
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

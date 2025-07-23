@@ -1,11 +1,14 @@
 @page "/email/{EmailId}"
 @using MailKit
 @using MailKit.Net.Imap
+@using MailKit.Security
 @using MimeKit
 @using ainbox.Shared.Services
 @using Ganss.Xss
+@using Microsoft.Extensions.Logging
 @inject ISettingsService SettingsService
 @inject NavigationManager Navigation
+@inject ILogger<EmailDetail> Logger
 
 <PageTitle>Email Details</PageTitle>
 
@@ -121,17 +124,17 @@
         }
         catch (ImapProtocolException ex)
         {
-            Console.WriteLine($"IMAP protocol error: {ex.Message}");
+            Logger.LogError(ex, "IMAP protocol error: {Message}", ex.Message);
             emailMessage = null;
         }
         catch (AuthenticationException ex)
         {
-            Console.WriteLine($"Authentication error: {ex.Message}");
+            Logger.LogError(ex, "Authentication error: {Message}", ex.Message);
             emailMessage = null;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Unexpected error: {ex.Message}");
+            Logger.LogError(ex, "Unexpected error: {Message}", ex.Message);
             emailMessage = null;
         }
     }
