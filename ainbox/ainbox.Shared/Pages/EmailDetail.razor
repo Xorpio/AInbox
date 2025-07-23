@@ -118,8 +118,19 @@
 
             client.Disconnect(true);
         }
-        catch (Exception)
+        catch (ImapProtocolException ex)
         {
+            Console.WriteLine($"IMAP protocol error: {ex.Message}");
+            emailMessage = null;
+        }
+        catch (AuthenticationException ex)
+        {
+            Console.WriteLine($"Authentication error: {ex.Message}");
+            emailMessage = null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
             emailMessage = null;
         }
     }
