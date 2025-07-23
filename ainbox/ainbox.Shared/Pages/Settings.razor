@@ -1,0 +1,37 @@
+﻿@page "/Settings"
+@using ainbox.Shared.Services
+@inject ISettingsService SettingsService
+
+<h3>Settings</h3>
+
+<p>Use this page to configure your settings.</p>
+
+<div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" class="form-control" id="username" @bind="username" />
+</div>
+<div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" @bind="password" />
+</div>
+
+<button class="btn btn-primary" @onclick="SaveSettings">Save</button>
+
+@code {
+    private string? username = string.Empty;
+    private string? password = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        username = await SettingsService.GetSetting("Username");
+        password = await SettingsService.GetSetting("Password");
+    }
+
+    private async Task SaveSettings()
+    {
+        if (!string.IsNullOrWhiteSpace(username))
+            await SettingsService.StoreSetting("Username", username);
+        if (!string.IsNullOrWhiteSpace(password))
+            await SettingsService.StoreSetting("Password", password);
+    }
+}

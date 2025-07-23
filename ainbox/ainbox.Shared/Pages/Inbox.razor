@@ -1,0 +1,81 @@
+﻿@page "/"
+@using MailKit
+@using MailKit.Net.Imap
+@using MailKit.Search
+@using ainbox.Shared.Services
+@inject ISettingsService SettingsService
+
+<PageTitle>Inbox</PageTitle>
+
+<h1>Inbox page</h1>
+
+
+@if (@username == null || @password == null)
+{
+    <div>No username or password configured.</div>
+}
+else
+{
+        <p>Total messages: @inboxCount</p>
+        <p>Recent messages: @inboxRecent</p>
+        <p>First subject: @subject</p>
+
+        <ul>
+            @foreach(var f in folders)
+            {
+                <li>@f</li>
+            }
+        </ul>
+}
+
+@code {
+    private int? inboxCount;
+    private int? inboxRecent;
+    private string subject;
+    private List<string> folders = new List<string>();
+
+    private string? username;
+    private string? password;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (username == null || password == null)
+        {
+            username = await SettingsService.GetSetting("Username");
+            password = await SettingsService.GetSetting("Password");
+        }
+
+        if (username != null && password != null)
+        {
+            using (var client = new ImapClient())
+            {
+                client.Connect("imap.gmail.com", 993, true);
+
+                await client.AuthenticateAsync(username, password);
+
+                // Select the inbox
+                var inbox = client.Inbox;
+                inbox.Open(MailKit.FolderAccess.ReadOnly);
+
+                // Fetch the messages
+                var query = SearchQuery.All;
+                var uids = inbox.Search(query);
+                var messages = inbox.Fetch(uids, MailKit.MessageSummaryItems.Envelope);
+
+                // Order the messages by date
+                var orderedMessages = messages.OrderByDescending(m => m.Envelope.Date).ToList().Take(100);
+
+                // Display the ordered messages
+                foreach (var message in orderedMessages)
+                {
+                    folders.Add($"{message.Envelope.Date}: {message.Envelope.Subject}");
+                }
+
+                // Disconnect from the server
+                client.Disconnect(true);
+            }
+        }
+
+        await base.OnInitializedAsync();
+    }
+}
