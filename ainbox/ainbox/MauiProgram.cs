@@ -18,6 +18,7 @@ namespace ainbox
 
             // Add device-specific services used by the ainbox.Shared project
             builder.Services.AddSingleton<IFormFactor, FormFactor>();
+            builder.Services.AddSingleton<ISettingsService, SettingsService>();
 
             builder.Services.AddMauiBlazorWebView();
 
