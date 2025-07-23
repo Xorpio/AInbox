@@ -3,6 +3,7 @@
 @using MailKit.Net.Imap
 @using MimeKit
 @using ainbox.Shared.Services
+@using Ganss.Xss
 @inject ISettingsService SettingsService
 @inject NavigationManager Navigation
 
@@ -38,7 +39,7 @@
                 <div class="email-body">
                     @if (!string.IsNullOrEmpty(emailMessage.HtmlBody))
                     {
-                        @((MarkupString)emailMessage.HtmlBody)
+                        @((MarkupString)SanitizeHtml(emailMessage.HtmlBody))
                     }
                     else if (!string.IsNullOrEmpty(emailMessage.TextBody))
                     {
@@ -122,6 +123,39 @@
         {
             emailMessage = null;
         }
+    }
+
+    private string SanitizeHtml(string htmlContent)
+    {
+        var sanitizer = new HtmlSanitizer();
+
+        // Configure allowed tags for email content
+        sanitizer.AllowedTags.Clear();
+        sanitizer.AllowedTags.UnionWith(new[] {
+            "p", "div", "span", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6",
+            "strong", "b", "em", "i", "u", "s", "sub", "sup",
+            "ul", "ol", "li", "blockquote", "pre", "code",
+            "a", "img", "table", "thead", "tbody", "tr", "td", "th"
+        });
+
+        // Configure allowed attributes
+        sanitizer.AllowedAttributes.Clear();
+        sanitizer.AllowedAttributes.UnionWith(new[] {
+            "href", "title", "alt", "src", "width", "height", "style"
+        });
+
+        // Allow safe CSS properties
+        sanitizer.AllowedCssProperties.Clear();
+        sanitizer.AllowedCssProperties.UnionWith(new[] {
+            "color", "background-color", "font-size", "font-family", "font-weight",
+            "text-align", "margin", "padding", "border", "width", "height"
+        });
+
+        // Remove dangerous schemes
+        sanitizer.AllowedSchemes.Clear();
+        sanitizer.AllowedSchemes.UnionWith(new[] { "http", "https", "mailto" });
+
+        return sanitizer.Sanitize(htmlContent);
     }
 
     private void GoBack()
