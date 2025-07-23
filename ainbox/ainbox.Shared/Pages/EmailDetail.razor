@@ -1,0 +1,176 @@
+@page "/email/{EmailId}"
+@using MailKit
+@using MailKit.Net.Imap
+@using MimeKit
+@using ainbox.Shared.Services
+@using Ganss.Xss
+@inject ISettingsService SettingsService
+@inject NavigationManager Navigation
+
+<PageTitle>Email Details</PageTitle>
+
+<div>
+    <button class="btn btn-primary mb-3" @onclick="GoBack">← Back to Inbox</button>
+
+    @if (isLoading)
+    {
+        <div>Loading email...</div>
+    }
+    else if (emailMessage != null)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h3>@emailMessage.Subject</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-2"><strong>From:</strong></div>
+                    <div class="col-10">@emailMessage.From</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-2"><strong>To:</strong></div>
+                    <div class="col-10">@emailMessage.To</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-2"><strong>Date:</strong></div>
+                    <div class="col-10">@emailMessage.Date.ToString("f")</div>
+                </div>
+                <hr />
+                <div class="email-body">
+                    @if (!string.IsNullOrEmpty(emailMessage.HtmlBody))
+                    {
+                        @((MarkupString)SanitizeHtml(emailMessage.HtmlBody))
+                    }
+                    else if (!string.IsNullOrEmpty(emailMessage.TextBody))
+                    {
+                        <pre style="white-space: pre-wrap; font-family: inherit;">@emailMessage.TextBody</pre>
+                    }
+                    else
+                    {
+                        <div>No email content available.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">Email not found or error loading email.</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string EmailId { get; set; } = string.Empty;
+
+    private DetailedEmailMessage? emailMessage;
+    private bool isLoading = true;
+    private string? username;
+    private string? password;
+
+    public class DetailedEmailMessage
+    {
+        public required string Subject { get; set; }
+        public required string From { get; set; }
+        public required string To { get; set; }
+        public required DateTimeOffset Date { get; set; }
+        public string? HtmlBody { get; set; }
+        public string? TextBody { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        username = await SettingsService.GetSetting("Username");
+        password = await SettingsService.GetSetting("Password");
+
+        if (username != null && password != null && !string.IsNullOrEmpty(EmailId))
+        {
+            await LoadEmailContent();
+        }
+
+        isLoading = false;
+    }
+
+    private async Task LoadEmailContent()
+    {
+        try
+        {
+            if (!uint.TryParse(EmailId, out uint uid))
+                return;
+
+            using var client = new ImapClient();
+            client.Connect("imap.gmail.com", 993, true);
+            await client.AuthenticateAsync(username!, password!);
+
+            var inbox = client.Inbox;
+            inbox.Open(MailKit.FolderAccess.ReadOnly);
+
+            var uniqueId = new UniqueId(uid);
+            var message = inbox.GetMessage(uniqueId);
+
+            emailMessage = new DetailedEmailMessage
+            {
+                Subject = message.Subject ?? "No Subject",
+                From = message.From.ToString(),
+                To = message.To.ToString(),
+                Date = message.Date,
+                HtmlBody = message.HtmlBody,
+                TextBody = message.TextBody
+            };
+
+            client.Disconnect(true);
+        }
+        catch (ImapProtocolException ex)
+        {
+            Console.WriteLine($"IMAP protocol error: {ex.Message}");
+            emailMessage = null;
+        }
+        catch (AuthenticationException ex)
+        {
+            Console.WriteLine($"Authentication error: {ex.Message}");
+            emailMessage = null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
+            emailMessage = null;
+        }
+    }
+
+    private string SanitizeHtml(string htmlContent)
+    {
+        var sanitizer = new HtmlSanitizer();
+
+        // Configure allowed tags for email content
+        sanitizer.AllowedTags.Clear();
+        sanitizer.AllowedTags.UnionWith(new[] {
+            "p", "div", "span", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6",
+            "strong", "b", "em", "i", "u", "s", "sub", "sup",
+            "ul", "ol", "li", "blockquote", "pre", "code",
+            "a", "img", "table", "thead", "tbody", "tr", "td", "th"
+        });
+
+        // Configure allowed attributes
+        sanitizer.AllowedAttributes.Clear();
+        sanitizer.AllowedAttributes.UnionWith(new[] {
+            "href", "title", "alt", "src", "width", "height", "style"
+        });
+
+        // Allow safe CSS properties
+        sanitizer.AllowedCssProperties.Clear();
+        sanitizer.AllowedCssProperties.UnionWith(new[] {
+            "color", "background-color", "font-size", "font-family", "font-weight",
+            "text-align", "margin", "padding", "border", "width", "height"
+        });
+
+        // Remove dangerous schemes
+        sanitizer.AllowedSchemes.Clear();
+        sanitizer.AllowedSchemes.UnionWith(new[] { "http", "https", "mailto" });
+
+        return sanitizer.Sanitize(htmlContent);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
