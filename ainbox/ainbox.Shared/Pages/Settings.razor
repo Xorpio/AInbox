@@ -11,15 +11,16 @@
     <input type="text" class="form-control" id="username" @bind="username" />
 </div>
 <div class="form-group">
-    <label for="password">Password</label>
-    <input type="password" class="form-control" id="password" @bind="password" />
+    <label for="password">New Password</label>
+    <input type="password" class="form-control" id="password" @bind="newPassword" />
 </div>
 
 <button class="btn btn-primary" @onclick="SaveSettings">Save</button>
 
 @code {
     private string? username = string.Empty;
-    private string? password = string.Empty;
+    private string? password = string.Empty; // Stored password, not displayed
+    private string? newPassword = string.Empty; // For password changes
 
     protected override async Task OnInitializedAsync()
     {

@@ -7,8 +7,6 @@ public class SettingsService : ISettingsService
 {
     private readonly IJSRuntime _jsRuntime;
     private readonly Dictionary<string, string> _cache = new();
-    private bool _isInitialized = false;
-
     public SettingsService(IJSRuntime jsRuntime)
     {
         _jsRuntime = jsRuntime;
