@@ -4,6 +4,7 @@
 @using MailKit.Search
 @using ainbox.Shared.Services
 @inject ISettingsService SettingsService
+@inject NavigationManager Navigation
 
 <PageTitle>Inbox</PageTitle>
 
@@ -20,10 +21,19 @@ else
         <p>Recent messages: @inboxRecent</p>
         <p>First subject: @subject</p>
 
-        <ul>
-            @foreach(var f in folders)
+        <ul class="list-group">
+            @foreach(var email in emails)
             {
-                <li>@f</li>
+                <li class="list-group-item list-group-item-action" style="cursor: pointer;" @onclick="() => NavigateToEmail(email.UniqueId)">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="mb-1">@email.Subject</h6>
+                            <p class="mb-1">@email.Sender</p>
+                            <small>@email.Preview</small>
+                        </div>
+                        <small>@email.Date.ToString("MMM dd")</small>
+                    </div>
+                </li>
             }
         </ul>
 }
@@ -32,7 +42,7 @@ else
     private int? inboxCount;
     private int? inboxRecent;
     private string subject;
-    private List<string> folders = new List<string>();
+    private List<EmailMessage> emails = new List<EmailMessage>();
 
     private string? username;
     private string? password;
@@ -68,7 +78,14 @@ else
                 // Display the ordered messages
                 foreach (var message in orderedMessages)
                 {
-                    folders.Add($"{message.Envelope.Date}: {message.Envelope.Subject}");
+                    emails.Add(new EmailMessage
+                    {
+                        Subject = message.Envelope.Subject ?? "No Subject",
+                        Sender = message.Envelope.From.FirstOrDefault()?.Name ?? message.Envelope.From.FirstOrDefault()?.ToString() ?? "Unknown Sender",
+                        Date = message.Envelope.Date ?? DateTimeOffset.Now,
+                        UniqueId = message.UniqueId,
+                        Preview = $"{message.Envelope.Date}: {message.Envelope.Subject}"
+                    });
                 }
 
                 // Disconnect from the server
@@ -77,5 +94,10 @@ else
         }
 
         await base.OnInitializedAsync();
+    }
+
+    private void NavigateToEmail(UniqueId emailId)
+    {
+        Navigation.NavigateTo($"/email/{emailId.Id}");
     }
 }
